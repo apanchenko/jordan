@@ -1,7 +1,6 @@
 import time, logging, signal, asyncio
 from typing import Any, List, Callable, TypeVar, cast
 from functools import wraps
-from datetime import datetime as dt
 
 from influxdb_client import InfluxDBClient, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -14,35 +13,47 @@ def init(url: str,
          bucket: str,
          *,
          loop: asyncio.AbstractEventLoop = None,
-         delay_s: int = 60,
+         delay: int = 60,
          latency_accuracy: int = 6,
-         batch_size: int = 100,
-         max_batch_s: int = 3600) -> None:
+         min_batch_size: int = 100,
+         max_batch_duration: int = 3600) -> None:
     """ Initialize before any measured function called
-    url              : InfluxDb server API url
-    organ            : InfluxDb organization
-    token            : InfluxDb auth token
-    bucket           : InfluxDb destination bucket
-    delay_s          : seconds between consecutive reports
-    latency_accuracy : number of digits after point for latency
-    batch_size       : minimum number of records in batch to send
-    sparse           : send record when measured, not every period
-    max_batch_s      : maximum duration of batch in seconds
+    url                 : InfluxDb server API url
+    organ               : InfluxDb organization
+    token               : InfluxDb auth token
+    bucket              : InfluxDb destination bucket
+    delay               : seconds between consecutive reports
+    latency_accuracy    : number of digits after point for latency
+    min_batch_size      : minimum number of records in batch to send
+    max_batch_duration  : maximum duration of batch in seconds
     """
+
+    if delay < 1:
+        raise ValueError('delay must be positive')
+
+    if latency_accuracy < 0 or latency_accuracy > 9:
+        raise ValueError('latency accuracy must be in range [0, 9]')
+
+    if min_batch_size < 1:
+        raise ValueError('minimum batch size must be positive')
+
+    if max_batch_duration < 1:
+        raise ValueError('maximum batch duration must be positive')
+
     now = time.time()
 
     global _influx, _bucket, _delays, _format, _log, _period, _sparse
     _log    = logging.getLogger('⏱️')
-    _log.info(f'Report measured calls every {delay_s} seconds')
+    _log.info(f'Report measured calls every {delay} seconds')
     _client  = InfluxDBClient(url=url, org=organ, token=token)
     _influx = _client.write_api(write_options=SYNCHRONOUS)
     _bucket = bucket
-    _delays = delay_s
+    _delays = delay
     _format = f'.{latency_accuracy}f'
 
     global _batch, _batchs, _batch_end, _out
-    _batch  = batch_size
-    _batchs = max_batch_s
+    _batch  = min_batch_size
+    _batchs = max_batch_duration
     _period = int(now / _delays)
     _batch_end = now + _batchs
     _out    = []
@@ -148,7 +159,6 @@ class measured:
         # save this call
         self.count += 1
         self.spent += finish - start
-        #_log.info(f'report {self._label} {format(finish - start, _format)} at {dt.fromtimestamp(period * _delays):%H:%M}')
 
 
     def _report_dense(self, start:float, finish:float) -> None:
@@ -161,7 +171,6 @@ class measured:
         if period > _period:
             global _out
             while period > _period:
-                #_log.info(f'work on {len(_decors)=}, {_period=}')
                 sec = _period * _delays
                 for d in _decors:
                     _out.append(d._empty(sec) if d.count==0 else d._linear(sec))
@@ -172,7 +181,6 @@ class measured:
         # save this call
         self.count += 1
         self.spent += finish - start
-        #_log.info(f'report {self._label} {format(finish - start, _format)} at {dt.fromtimestamp(period * _delays):%H:%M}')
 
 
     def _empty(self, ts:int) -> str:

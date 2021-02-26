@@ -57,6 +57,18 @@ ciso = ["ciso8601 (>=2.1.1)"]
 extra = ["pandas (>=0.25.3)", "numpy"]
 
 [[package]]
+name = "libfaketime"
+version = "2.0.0"
+description = "A fast alternative to freezegun that wraps libfaketime."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+python-dateutil = ">=1.3,<2.0 || >2.0"
+pytz = "*"
+
+[[package]]
 name = "more-itertools"
 version = "8.7.0"
 description = "More routines for operating on iterables, beyond itertools"
@@ -183,7 +195,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "f54dd8ff30ba3a41489cdd8eaa1b0f1115c64b65075521f6258960ca75e1ce9d"
+content-hash = "a89d4a21388cdab7592ad95b59f7b968172206f47cec706dde554dacafc99bfa"
 
 [metadata.files]
 atomicwrites = [
@@ -205,6 +217,9 @@ colorama = [
 influxdb-client = [
     {file = "influxdb_client-1.14.0-py3-none-any.whl", hash = "sha256:63195bc5088798985a4dc3d1c0a7d06716d65db04a9b1e2b23e698e36c1a1567"},
     {file = "influxdb_client-1.14.0.tar.gz", hash = "sha256:c1dcea9bf4b085a635fd3dcc9037a3bff24f0799a45bc4773f07ec8930d576dc"},
+]
+libfaketime = [
+    {file = "libfaketime-2.0.0.tar.gz", hash = "sha256:a63b3f359f6f15f7b814ebfe1e4a9642bd481178223f0d97aab1a537475876df"},
 ]
 more-itertools = [
     {file = "more-itertools-8.7.0.tar.gz", hash = "sha256:c5d6da9ca3ff65220c3bfd2a8db06d698f05d4d2b9be57e1deb2be5a45019713"},

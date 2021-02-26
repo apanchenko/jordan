@@ -1,4 +1,6 @@
-# Peano - performance measurement
+# Peano
+
+Decorator for performance measurement
 
 - Measures function calls: TPS and Latency
 - Reports to InfluxDB
@@ -15,4 +17,4 @@
 ## TODO
 
 - tests
-- async commit
+- async commit to influx
