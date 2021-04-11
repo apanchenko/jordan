@@ -3,7 +3,7 @@ from pytest import mark, raises
 import peano
 
 def test_version():
-    assert peano.__version__ == '0.1.2'
+    assert peano.__version__ == '0.1.3'
 
 @mark.parametrize("name, value, expect", [
     ("delay", -100, raises(ValueError)),

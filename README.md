@@ -18,3 +18,11 @@ Decorator for performance measurement
 
 - tests
 - async commit to influx
+
+## dev
+
+poetry shell
+poetry update
+pytest
+poetry build
+poetry publish

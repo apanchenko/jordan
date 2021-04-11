@@ -22,6 +22,7 @@ def init(url: str,
     organ               : InfluxDb organization
     token               : InfluxDb auth token
     bucket              : InfluxDb destination bucket
+    loop                : ignored
     delay               : seconds between consecutive reports
     latency_accuracy    : number of digits after point for latency
     min_batch_size      : minimum number of records in batch to send
@@ -57,22 +58,6 @@ def init(url: str,
     _period = int(now / _delays)
     _batch_end = now + _batchs
     _out    = []
-
-    # write pending output on shutdown
-    if loop is None:
-        loop = asyncio.get_event_loop()
-
-    def wrap_handler(handler):
-        def shutdown():
-            if len(_out) > 0:
-                _influx.write(bucket=_bucket, record=_out, write_precision=WritePrecision.S)
-                _out.clear()
-            handler()
-        return shutdown
-
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        handler = signal.getsignal(sig)
-        loop.add_signal_handler(sig, wrap_handler(handler))
 
 
 _bucket     : str
